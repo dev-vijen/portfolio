@@ -1,4 +1,41 @@
 // ==========================================
+// THEME TOGGLE (Dark / Light Mode)
+// ==========================================
+
+const themeToggleBtn = document.getElementById("theme-toggle");
+const themeIcon = themeToggleBtn.querySelector("i");
+
+function applyTheme(isDark) {
+    document.body.classList.toggle("dark-mode", isDark);
+    themeIcon.classList.toggle("fa-moon", !isDark);
+    themeIcon.classList.toggle("fa-sun", isDark);
+}
+
+const savedTheme = localStorage.getItem("theme");
+const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+applyTheme(savedTheme ? savedTheme === "dark" : systemPrefersDark);
+
+themeToggleBtn.addEventListener("click", () => {
+    const isDark = !document.body.classList.contains("dark-mode");
+    applyTheme(isDark);
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+});
+
+
+// ==========================================
+// RESUME LINKS — SINGLE SOURCE OF TRUTH
+// ==========================================
+// Update this ONE line whenever your resume changes.
+// Every Resume button on the site (navbar, hero, footer) reads from here,
+// so they can never point to different files again.
+
+const RESUME_URL = "resume/Vijendra_Kumar_Resume.pdf";
+
+document.querySelectorAll("#navResumeBtn, #heroResumeBtn, #footerResumeBtn")
+    .forEach((btn) => { btn.href = RESUME_URL; });
+
+
+// ==========================================
 // PART 1
 // TYPING ANIMATION
 // ==========================================
@@ -201,19 +238,29 @@ const cards=document.querySelectorAll(
 
 cards.forEach((card)=>{
 
+    let tiltFrame = null;
+
     card.addEventListener("mousemove",(e)=>{
 
-        const rect=card.getBoundingClientRect();
+        if (tiltFrame) return; // skip if a frame is already queued
 
-        const x=e.clientX-rect.left;
+        tiltFrame = requestAnimationFrame(() => {
 
-        const y=e.clientY-rect.top;
+            const rect=card.getBoundingClientRect();
 
-        card.style.transform=
+            const x=e.clientX-rect.left;
 
-        `rotateX(${-(y-rect.height/2)/25}deg)
-         rotateY(${(x-rect.width/2)/25}deg)
-         translateY(-8px)`;
+            const y=e.clientY-rect.top;
+
+            card.style.transform=
+
+            `rotateX(${-(y-rect.height/2)/25}deg)
+             rotateY(${(x-rect.width/2)/25}deg)
+             translateY(-8px)`;
+
+            tiltFrame = null;
+
+        });
 
     });
 
@@ -237,6 +284,8 @@ const backToTop = document.createElement("button");
 backToTop.innerHTML = '<i class="fa-solid fa-arrow-up"></i>';
 
 backToTop.id = "backToTop";
+
+backToTop.setAttribute("aria-label", "Back to top");
 
 document.body.appendChild(backToTop);
 
